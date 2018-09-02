@@ -1,5 +1,6 @@
 import argparse
 import sys
+from ChefRequest import makeRequest
 
 
 def create_parser():
@@ -25,7 +26,7 @@ def main(argv=None):
 
         if user:
             # Make request to fetch user details .....
-            print(user)
+            print(makeRequest("GET", "https://api.codechef.com/users/"+user).content)
 
     except KeyboardInterrupt:
         print('\nBye.')
