@@ -3,12 +3,13 @@ import json
 import requests
 
 auth_token_url = "https://api.codechef.com/oauth/token"
-
+oauth_url = "https://api.codechef.com/oauth/authorize"
 
 def makeRequest(type, url, body={}):
 
     CLIENT_ID = config('CLIENT_ID')
     CLIENT_SECRET = config('CLIENT_SECRET')
+    STATE = config('STATE')
 
     data = {
         "grant_type": "client_credentials",
@@ -17,8 +18,8 @@ def makeRequest(type, url, body={}):
         "client_secret": CLIENT_SECRET
     }
 
-    # Add logic to store ACCESS TOKEN in a secure manner.
-
+    # Add logic to store ACCESS TOKEN in a secure manner. - Client Grant
+    
     res = requests.post(auth_token_url, data)
     json_data = json.loads(res.text)
     ACCESS_TOKEN = json_data.get('result').get('data').get('access_token')
