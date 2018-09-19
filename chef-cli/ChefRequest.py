@@ -19,7 +19,7 @@ def makeRequest(type, url, body={}):
     }
 
     # Add logic to store ACCESS TOKEN in a secure manner. - Client Grant
-    
+
     res = requests.post(auth_token_url, data)
     json_data = json.loads(res.text)
     ACCESS_TOKEN = json_data.get('result').get('data').get('access_token')
