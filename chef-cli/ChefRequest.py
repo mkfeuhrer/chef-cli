@@ -9,7 +9,7 @@ def makeRequest(type, url, body={}):
 
     CLIENT_ID = config('CLIENT_ID')
     CLIENT_SECRET = config('CLIENT_SECRET')
-    STATE = config('STATE')
+    # STATE = config('STATE')
 
     data = {
         "grant_type": "client_credentials",

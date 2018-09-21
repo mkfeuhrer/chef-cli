@@ -3,10 +3,13 @@ import sys
 import json
 import csv
 import os
+import requests
 from ChefRequest import makeRequest
+
 
 def decode(response):
     return json.loads(json.dumps(response.json()['result']))
+
 
 def create_parser():
     parser = argparse.ArgumentParser()
@@ -26,10 +29,12 @@ def create_parser():
                         help='Gets Problems listed in todo')
     parser.add_argument('--user', required=False, metavar='<Username>',
                         help='Get user information.')
-    parser.add_argument('--compare', required=False, nargs=2, metavar=('<Username1>','<Username2>'),
+    parser.add_argument('--compare', required=False, nargs=2, metavar=('<Username1>', '<Username2>'),
                         help='Compare two user profiles eg: vijju123 kingofnumber')
-    parser.add_argument('--submit', required=False,  nargs=3, metavar=('<CodeFilePath>', '<Language>' , '<InputString>'),
+    parser.add_argument('--submit', required=False, nargs=3, metavar=('<CodeFilePath>', '<Language>', '<InputString>'),
                         help='Submit and get output of code for a input.\nRequires three argument: codeFilePath, language and input string.\n E.g ./a.cpp C++ 4.3.2 Mohit \n If no input leave use -> ""\n.Check languages available using --languages')
+    parser.add_argument('--recommend', required=False, metavar='<Username>',
+                        help='Get problem recommendation for a particular user.')
     return parser
 
 
@@ -44,46 +49,60 @@ def main(argv=None):
         parser = create_parser()
         args = parser.parse_args(argv[1:])
 
-
         # Arguments initialization
         contests = args.contests
-        contestDetails=args.contestdetails
-        countries=args.countries
+        contestDetails = args.contestdetails
+        countries = args.countries
         institution = args.institution
-        languages=args.languages
-        tags=args.tags
-        todo=args.todo
-        user=args.user
-        compare=args.compare
-        submit=args.submit
+        languages = args.languages
+        tags = args.tags
+        todo = args.todo
+        user = args.user
+        compare = args.compare
+        submit = args.submit
+        recommend = args.recommend
 
         # Parser check
         if compare:
-            #Compare two user profiles
+            # Compare two user profiles
             compareProfiles(compare)
 
         elif contests:
             # Make request to fetch list of all contests
-            response = decode(makeRequest("GET", "https://api.codechef.com/contests"))
+            response = decode(makeRequest(
+                "GET", "https://api.codechef.com/contests"))
 
         elif contestDetails:
             # Make request to fetch details of particular contest
-            response = decode(makeRequest("GET", "https://api.codechef.com/contests/"+contestDetails))
+            response = decode(makeRequest(
+                "GET", "https://api.codechef.com/contests/" + contestDetails))
 
         elif countries:
             # Make request to fetch list of countries
-            response = decode(makeRequest("GET", "https://api.codechef.com/country"))
+            response = decode(makeRequest(
+                "GET", "https://api.codechef.com/country"))
 
         elif institution:
             # Make request to search institution
-            response = decode(makeRequest("GET", "https://api.codechef.com/institution?search="+institution))
+            response = decode(makeRequest(
+                "GET", "https://api.codechef.com/institution?search=" + institution))
 
         elif languages:
-            response = decode(makeRequest("GET", "https://api.codechef.com/language"))
-            languagesList = response.get("data","Not Found").get("content","Not Found")
+            response = decode(makeRequest(
+                "GET", "https://api.codechef.com/language"))
+            languagesList = response.get(
+                "data", "Not Found").get("content", "Not Found")
             print("\n---------------------List of Languages---------------------\n")
             for lang in languagesList:
-                print(lang.get("shortName",""))
+                print(lang.get("shortName", ""))
+
+        elif recommend:
+            response = requests.get(
+                "http://149.129.138.84:5000/api/recommend/user/" + recommend).json()
+            problem_list = response.get("recommendedProblems", [])
+
+            for problem in problem_list:
+                print(problem)
 
         elif submit:
             # Submit and run code for output
@@ -91,15 +110,18 @@ def main(argv=None):
 
         elif tags:
             # Make request to fetch details of particular all_tags
-            response = decode(makeRequest("GET", "https://api.codechef.com/tags/problems?filter="+tags))
+            response = decode(makeRequest(
+                "GET", "https://api.codechef.com/tags/problems?filter=" + tags))
 
         elif todo:
             # Make request to fetch user todo problems
-            response = decode(makeRequest("GET", "https://api.codechef.com/todo/problems/"))
+            response = decode(makeRequest(
+                "GET", "https://api.codechef.com/todo/problems/"))
 
         elif user:
             # Make request to fetch user details
-            response = decode(makeRequest("GET", "https://api.codechef.com/users/"+user))
+            response = decode(makeRequest(
+                "GET", "https://api.codechef.com/users/" + user))
 
         # print(json.dumps(response, indent=4, sort_keys=True))
 
@@ -107,40 +129,46 @@ def main(argv=None):
         print('\nGood Bye.')
     return 0
 
+
 def submitCode(submit):
     parameters = {}
     file = open(submit[0], "r")
-    parameters['sourceCode'] = file.read();
-    parameters['language'] = submit[1];
-    parameters['input'] = submit[2];
-    response = makeRequest("POST", "https://api.codechef.com/ide/run", parameters)
-    result = response.json().get('result',"error").get('data',"").get("link","")
-    response = decode(makeRequest("GET", "https://api.codechef.com/ide/status?link="+result))
+    parameters['sourceCode'] = file.read()
+    parameters['language'] = submit[1]
+    parameters['input'] = submit[2]
+    response = makeRequest(
+        "POST", "https://api.codechef.com/ide/run", parameters)
+    result = response.json().get('result', "error").get('data', "").get("link", "")
+    response = decode(makeRequest(
+        "GET", "https://api.codechef.com/ide/status?link=" + result))
 
     print("\n---------------------Submission Result---------------------\n")
-    print("Input :\n"+response.get('data',"").get('input')+"\n")
-    print("Compiler :"+response.get('data',"").get('langVersion')+"\n")
-    print("Output :\n"+response.get('data',"").get('output')+"\n")
-    if(response.get('data',"").get('stderr') != ""):
-        print("Std Error :\n"+response.get('data',"").get('stderr'))
-    if(response.get('data',"").get('cmpinfo') != ""):
-        print("Compilation Result :\n"+response.get('data',"").get('cmpinfo'))
+    print("Input :\n" + response.get('data', "").get('input') + "\n")
+    print("Compiler :" + response.get('data', "").get('langVersion') + "\n")
+    print("Output :\n" + response.get('data', "").get('output') + "\n")
+    if(response.get('data', "").get('stderr') != ""):
+        print("Std Error :\n" + response.get('data', "").get('stderr'))
+    if(response.get('data', "").get('cmpinfo') != ""):
+        print("Compilation Result :\n" + response.get('data', "").get('cmpinfo'))
     print("-------------------------------------------------------------\n")
 
     return 0
+
 
 def compareProfiles(compare):
 
     user1 = compare[0]
     user2 = compare[1]
-    response1 = decode(makeRequest("GET", "https://api.codechef.com/users/"+compare[0]))
-    response2 = decode(makeRequest("GET", "https://api.codechef.com/users/"+compare[1]))
+    response1 = decode(makeRequest(
+        "GET", "https://api.codechef.com/users/" + compare[0]))
+    response2 = decode(makeRequest(
+        "GET", "https://api.codechef.com/users/" + compare[1]))
 
     data = []
     ranks = []
     columnNames = ["Details"]
-    columnNames.append("User1");
-    columnNames.append("User2");
+    columnNames.append("User1")
+    columnNames.append("User2")
     ranks.append(columnNames)
     data.append(columnNames)
 
@@ -188,14 +216,21 @@ def compareProfiles(compare):
         print("\t".join(word.ljust(col_width) for word in row))
     print("\n-------------------------------------------------------------\n")
 
+    ranks.pop(0)
+    header_columns = ['@ ' + name1, name2]
+
     # Make data here
-    # with open("compare_profile.csv",mode="w") as file:
-    #     file_writer = csv.writer(file,delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-    #     for rank in ranks:
-    #         file_writer.writerow(rank)
+    with open("compare_profile.dat", mode="w") as file:
+        file_writer = csv.writer(file, delimiter=',', quotechar='"',
+                                 quoting=csv.QUOTE_MINIMAL)
+        file_writer.writerow(header_columns)
+        for rank in ranks:
+            file_writer.writerow(rank)
     # Print graph
-    # os.system('termgraph compare_profile.csv --color {blue,red}')
+    os.system('termgraph compare_profile.dat --color {blue,red}')
+    os.system('rm compare_profile.dat')
     return
+
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))
