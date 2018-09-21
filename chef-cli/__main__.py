@@ -4,7 +4,9 @@ import json
 import csv
 import os
 import requests
+import collections
 from ChefRequest import makeRequest
+from datetime import datetime
 
 
 def decode(response):
@@ -35,6 +37,8 @@ def create_parser():
                         help='Submit and get output of code for a input.\nRequires three argument: codeFilePath, language and input string.\n E.g ./a.cpp C++ 4.3.2 Mohit \n If no input leave use -> ""\n.Check languages available using --languages')
     parser.add_argument('--recommend', required=False, metavar='<Username>',
                         help='Get problem recommendation for a particular user.')
+    parser.add_argument('--graph', required=False, metavar='<Username',
+                        help='Get submission graph for a particluar user.')
     return parser
 
 
@@ -60,7 +64,8 @@ def main(argv=None):
         user = args.user
         compare = args.compare
         submit = args.submit
-        recommend = args.recommend
+        graph_user = args.graph
+        recommend_user = args.recommend
 
         # Parser check
         if compare:
@@ -82,6 +87,10 @@ def main(argv=None):
             response = decode(makeRequest(
                 "GET", "https://api.codechef.com/country"))
 
+        elif graph_user:
+
+            submissionGraph(graph_user)
+
         elif institution:
             # Make request to search institution
             response = decode(makeRequest(
@@ -96,9 +105,9 @@ def main(argv=None):
             for lang in languagesList:
                 print(lang.get("shortName", ""))
 
-        elif recommend:
+        elif recommend_user:
             response = requests.get(
-                "http://149.129.138.84:5000/api/recommend/user/" + recommend).json()
+                "http://149.129.138.84:5000/api/recommend/user/" + recommend_user).json()
             problem_list = response.get("recommendedProblems", [])
 
             for problem in problem_list:
@@ -230,6 +239,54 @@ def compareProfiles(compare):
     os.system('termgraph compare_profile.dat --color {blue,red}')
     os.system('rm compare_profile.dat')
     return
+
+
+def submissionGraph(user):
+    # Experimental feature currently prints the submission graph for only last 600 submissions.
+    # Limitation is due to 30 API call restirction on Submission API in 5 minutes.
+
+    offset = 0
+    submissions = collections.OrderedDict()
+    now = datetime.now()
+    end = datetime(now.year - 1, now.month, now.day, now.hour,
+                   now.minute, now.second, now.microsecond)
+    end = str(end)
+
+    for i in range(1, 30):
+
+        response = makeRequest(
+            "GET", "https://api.codechef.com/submissions/?username=" + user + "&limit=20&offset=" + str(offset)).json()
+        submission = response.get("result", {}).get(
+            "data", {}).get("content", [])
+
+        date = "1970-01-01 00:00:00"
+
+        for sub in submission:
+
+            date = sub.get("date", "1970-01-01 00:00:00").split(" ")[0]
+            if submissions.get(date, ""):
+                submissions[date] += 1
+            else:
+                submissions[date] = 1
+
+        if end.split(" ")[0] > date.split(" ")[0]:
+            break
+
+        offset += 20
+
+    startDate = end.split(" ")[0]
+
+    sorted_submissions = collections.OrderedDict(sorted(submissions.items()))
+
+    with open("submission_graph.dat", mode="w") as file:
+        file_writer = csv.writer(file, delimiter=',', quotechar='"',
+                                 quoting=csv.QUOTE_MINIMAL)
+        for key, value in sorted_submissions.items():
+            file_writer.writerow([key, value])
+
+    os.system("termgraph --calendar --start-dt " +
+              startDate + " submission_graph.dat")
+    os.system('rm submission_graph.dat')
 
 
 if __name__ == '__main__':
