@@ -6,6 +6,7 @@ import os
 import requests
 import collections
 from ChefRequest import makeRequest
+from ChefParser import CodeChefHTMLParser
 from datetime import datetime
 
 
@@ -39,6 +40,8 @@ def create_parser():
                         help='Get problem recommendation for a particular user.')
     parser.add_argument('--graph', required=False, metavar='<Username',
                         help='Get submission graph for a particluar user.')
+    parser.add_argument('--problem', required=False, nargs=2, metavar=(
+        '<ContestCode>', '<ProblemCode>'), help='Get details of a particular Problem')
     return parser
 
 
@@ -66,6 +69,7 @@ def main(argv=None):
         submit = args.submit
         graph_user = args.graph
         recommend_user = args.recommend
+        problem = args.problem
 
         # Parser check
         if compare:
@@ -88,7 +92,7 @@ def main(argv=None):
                 "GET", "https://api.codechef.com/country"))
 
         elif graph_user:
-
+            # Display submission graph of the user
             submissionGraph(graph_user)
 
         elif institution:
@@ -105,7 +109,12 @@ def main(argv=None):
             for lang in languagesList:
                 print(lang.get("shortName", ""))
 
+        elif problem:
+            # Display details of a problem
+            renderProblem(problem)
+
         elif recommend_user:
+            # Recommend problems to a user based on the previous problems that he solved
             response = requests.get(
                 "http://149.129.138.84:5000/api/recommend/user/" + recommend_user).json()
             problem_list = response.get("recommendedProblems", [])
@@ -287,6 +296,27 @@ def submissionGraph(user):
     os.system("termgraph --calendar --start-dt " +
               startDate + " submission_graph.dat")
     os.system('rm submission_graph.dat')
+
+
+def renderProblem(problem):
+
+    response = makeRequest(
+        "GET", "https://api.codechef.com/contests/{0}/problems/{1}".format(problem[0], problem[1])).json()
+
+    data = response.get("result", {}).get(
+        "data", {}).get("content", {}).get("body", "")
+
+    parser = CodeChefHTMLParser()
+    parser.feed(data)
+
+    data = parser.getProblemStatement()
+
+    file = open("data.md", "w")
+    file.write(data)
+    file.close()
+
+    os.system("mdv data.md")
+    os.remove("data.md")
 
 
 if __name__ == '__main__':
