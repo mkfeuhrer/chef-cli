@@ -9,6 +9,9 @@ class CodeChefHTMLParser(HTMLParser):
     space = ""
     isATagContent = False
     isHTagContent = False
+    isExampleData = False
+    isInputData = False
+    isOutputData = False
 
     def handle_starttag(self, tag, attrs):
 
@@ -81,11 +84,29 @@ class CodeChefHTMLParser(HTMLParser):
             # self.problemStatement = self.problemStatement + '\n' + data
             self.problemStatement += data
 
-        if 'Example Input' in data:
-            self.sampleInput = data.replace('Example Input', '')
+        if 'example' in data.lower():
+            self.isExampleData = True
+            self.isInputData = False
+            self.isOutputData = False
 
-        if 'Example Output' in data:
-            self.sampleOutput = data.replace('Example Output', '')
+        elif 'explanation' in data.lower():
+            self.isExampleData = False
+            self.isInputData = False
+            self.isOutputData = False
+
+        elif self.isExampleData and 'input' in data.lower():
+            self.isInputData = True
+            self.isOutputData = False
+
+        elif self.isExampleData and 'output' in data.lower():
+            self.isInputData = False
+            self.isOutputData = True
+
+        elif self.isExampleData and self.isInputData:
+            self.sampleInput = self.sampleInput + data + '\n'
+
+        elif self.isExampleData and self.isOutputData:
+            self.sampleOutput = self.sampleOutput + data + '\n'
 
     def formatData(self, data):
 
