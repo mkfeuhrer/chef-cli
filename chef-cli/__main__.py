@@ -8,6 +8,7 @@ import collections
 from ChefRequest import makeRequest
 from ChefParser import CodeChefHTMLParser
 from datetime import datetime
+from termcolor import colored
 
 
 def decode(response):
@@ -42,6 +43,8 @@ def create_parser():
                         help='Get submission graph for a particluar user.')
     parser.add_argument('--problem', required=False, nargs=2, metavar=(
         '<ContestCode>', '<ProblemCode>'), help='Get details of a particular Problem')
+    parser.add_argument('--sampleSubmit', required=False, nargs=4, metavar=('<ContestCode>', '<ProblemCode>',
+                                                                            '<CodeFilePath>', '<Language>'), help='Submit a problem to check if it passes sample test cases.')
     return parser
 
 
@@ -70,6 +73,7 @@ def main(argv=None):
         graph_user = args.graph
         recommend_user = args.recommend
         problem = args.problem
+        sampleSubmit = args.sampleSubmit
 
         # Parser check
         if compare:
@@ -125,6 +129,10 @@ def main(argv=None):
         elif submit:
             # Submit and run code for output
             submitCode(submit)
+
+        elif sampleSubmit:
+            # Submit problem and check it's correctness on sample testcases
+            sampleSubmitCode(sampleSubmit)
 
         elif tags:
             # Make request to fetch details of particular all_tags
@@ -317,6 +325,48 @@ def renderProblem(problem):
 
     os.system("mdv data.md")
     os.remove("data.md")
+
+
+def sampleSubmitCode(sampleSubmit):
+
+    response = makeRequest(
+        "GET", "https://api.codechef.com/contests/{0}/problems/{1}".format(sampleSubmit[0], sampleSubmit[1])).json()
+
+    data = response.get("result", {}).get(
+        "data", {}).get("content", {}).get("body", "")
+
+    parser = CodeChefHTMLParser()
+    parser.feed(data)
+
+    data = parser.getSampleInput()
+
+    parameters = {}
+    file = open(sampleSubmit[2], "r")
+    parameters['sourceCode'] = file.read()
+    parameters['language'] = sampleSubmit[3]
+    parameters['input'] = data
+
+    response = makeRequest(
+        "POST", "https://api.codechef.com/ide/run", parameters)
+    result = response.json().get('result', "error").get('data', "").get("link", "")
+    response = decode(makeRequest(
+        "GET", "https://api.codechef.com/ide/status?link=" + result))
+
+    if response.get('data', "").get('output') in parser.getSampleOutput():
+        print(colored('\nSample Test Cases Passed Successfully', 'green'))
+    else:
+        print(colored('\nSample Test Cases Failed', 'red'))
+
+    print("\n---------------------Submission Result---------------------\n")
+    print("Sample Input :\n" + response.get('data', "").get('input') + "\n")
+    print("Compiler :" + response.get('data', "").get('langVersion') + "\n")
+    print("Your Output :\n" + response.get('data', "").get('output') + "\n")
+    print("Sample Output : \n" + parser.getSampleOutput() + "\n")
+    if(response.get('data', "").get('stderr') != ""):
+        print("Std Error :\n" + response.get('data', "").get('stderr'))
+    if(response.get('data', "").get('cmpinfo') != ""):
+        print("Compilation Result :\n" + response.get('data', "").get('cmpinfo'))
+    print("-------------------------------------------------------------\n")
 
 
 if __name__ == '__main__':

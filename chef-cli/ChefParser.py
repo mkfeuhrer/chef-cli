@@ -106,7 +106,7 @@ class CodeChefHTMLParser(HTMLParser):
             self.sampleInput = self.sampleInput + data + '\n'
 
         elif self.isExampleData and self.isOutputData:
-            self.sampleOutput = self.sampleOutput + data + '\n'
+            self.sampleOutput = self.sampleOutput + data + ' \n'
 
     def formatData(self, data):
 
