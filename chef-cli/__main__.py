@@ -7,8 +7,14 @@ import requests
 import collections
 import getpass
 from ChefRequest import makeRequest
+from ChefParser import CodeChefHTMLParser
 from datetime import datetime
+<<<<<<< HEAD
 from github3 import login
+=======
+from termcolor import colored
+
+>>>>>>> 965a5935bf7012f1aeafc2a13206e609881ab6ca
 
 def decode(response):
     return json.loads(json.dumps(response.json()['result']))
@@ -38,8 +44,17 @@ def create_parser():
                         help='Compare two user profiles eg: vijju123 kingofnumber')
     parser.add_argument('--recommend', required=False, metavar='<Username>',
                         help='Get problem recommendation for a particular user.')
+<<<<<<< HEAD
     parser.add_argument('--submit', required=False, nargs=3, metavar=('<CodeFilePath>', '<Language>', '<InputString>'),
                         help='Submit and get output of code for a input.\nRequires three argument: codeFilePath, language and input string.\n E.g ./a.cpp C++ 4.3.2 Mohit \n If no input leave use -> ""\n.Check languages available using --languages')
+=======
+    parser.add_argument('--graph', required=False, metavar='<Username',
+                        help='Get submission graph for a particluar user.')
+    parser.add_argument('--problem', required=False, nargs=2, metavar=(
+        '<ContestCode>', '<ProblemCode>'), help='Get details of a particular Problem')
+    parser.add_argument('--sampleSubmit', required=False, nargs=4, metavar=('<ContestCode>', '<ProblemCode>',
+                                                                            '<CodeFilePath>', '<Language>'), help='Submit a problem to check if it passes sample test cases.')
+>>>>>>> 965a5935bf7012f1aeafc2a13206e609881ab6ca
     return parser
 
 
@@ -67,6 +82,8 @@ def main(argv=None):
         submit = args.submit
         graph_user = args.graph
         recommend_user = args.recommend
+        problem = args.problem
+        sampleSubmit = args.sampleSubmit
 
         # Parser check
         if compare:
@@ -89,7 +106,7 @@ def main(argv=None):
                 "GET", "https://api.codechef.com/country"))
 
         elif graph_user:
-
+            # Display submission graph of the user
             submissionGraph(graph_user)
 
         elif institution:
@@ -106,7 +123,12 @@ def main(argv=None):
             for lang in languagesList:
                 print(lang.get("shortName", ""))
 
+        elif problem:
+            # Display details of a problem
+            renderProblem(problem)
+
         elif recommend_user:
+            # Recommend problems to a user based on the previous problems that he solved
             response = requests.get(
                 "http://149.129.138.84:5000/api/recommend/user/" + recommend_user).json()
             problem_list = response.get("recommendedProblems", [])
@@ -117,6 +139,10 @@ def main(argv=None):
         elif submit:
             # Submit and run code for output
             submitCode(submit)
+
+        elif sampleSubmit:
+            # Submit problem and check it's correctness on sample testcases
+            sampleSubmitCode(sampleSubmit)
 
         elif tags:
             # Make request to fetch details of particular all_tags
@@ -313,6 +339,69 @@ def submissionGraph(user):
     os.system("termgraph --calendar --start-dt " +
               startDate + " submission_graph.dat")
     os.system('rm submission_graph.dat')
+
+
+def renderProblem(problem):
+
+    response = makeRequest(
+        "GET", "https://api.codechef.com/contests/{0}/problems/{1}".format(problem[0], problem[1])).json()
+
+    data = response.get("result", {}).get(
+        "data", {}).get("content", {}).get("body", "")
+
+    parser = CodeChefHTMLParser()
+    parser.feed(data)
+
+    data = parser.getProblemStatement()
+
+    file = open("data.md", "w")
+    file.write(data)
+    file.close()
+
+    os.system("mdv data.md")
+    os.remove("data.md")
+
+
+def sampleSubmitCode(sampleSubmit):
+
+    response = makeRequest(
+        "GET", "https://api.codechef.com/contests/{0}/problems/{1}".format(sampleSubmit[0], sampleSubmit[1])).json()
+
+    data = response.get("result", {}).get(
+        "data", {}).get("content", {}).get("body", "")
+
+    parser = CodeChefHTMLParser()
+    parser.feed(data)
+
+    data = parser.getSampleInput()
+
+    parameters = {}
+    file = open(sampleSubmit[2], "r")
+    parameters['sourceCode'] = file.read()
+    parameters['language'] = sampleSubmit[3]
+    parameters['input'] = data
+
+    response = makeRequest(
+        "POST", "https://api.codechef.com/ide/run", parameters)
+    result = response.json().get('result', "error").get('data', "").get("link", "")
+    response = decode(makeRequest(
+        "GET", "https://api.codechef.com/ide/status?link=" + result))
+
+    if response.get('data', "").get('output') in parser.getSampleOutput():
+        print(colored('\nSample Test Cases Passed Successfully', 'green'))
+    else:
+        print(colored('\nSample Test Cases Failed', 'red'))
+
+    print("\n---------------------Submission Result---------------------\n")
+    print("Sample Input :\n" + response.get('data', "").get('input') + "\n")
+    print("Compiler :" + response.get('data', "").get('langVersion') + "\n")
+    print("Your Output :\n" + response.get('data', "").get('output') + "\n")
+    print("Sample Output : \n" + parser.getSampleOutput() + "\n")
+    if(response.get('data', "").get('stderr') != ""):
+        print("Std Error :\n" + response.get('data', "").get('stderr'))
+    if(response.get('data', "").get('cmpinfo') != ""):
+        print("Compilation Result :\n" + response.get('data', "").get('cmpinfo'))
+    print("-------------------------------------------------------------\n")
 
 
 if __name__ == '__main__':
