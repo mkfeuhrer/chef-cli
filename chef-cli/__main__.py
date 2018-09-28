@@ -5,16 +5,11 @@ import csv
 import os
 import requests
 import collections
-import getpass
 from ChefRequest import makeRequest
 from ChefParser import CodeChefHTMLParser
 from datetime import datetime
-<<<<<<< HEAD
-from github3 import login
-=======
 from termcolor import colored
 
->>>>>>> 965a5935bf7012f1aeafc2a13206e609881ab6ca
 
 def decode(response):
     return json.loads(json.dumps(response.json()['result']))
@@ -26,10 +21,8 @@ def create_parser():
                         help='Get All Contests')
     parser.add_argument('--contestdetails', required=False, metavar='<ContestDetails>',
                         help='Get details of Contest.Eg- JAN17,APR18')
-    parser.add_argument('--countries', required=False, action='store_true',
-                        help='Get list of countries')
-    parser.add_argument('--graph', required=False, metavar='<Username>',
-                        help='Get submission graph for a particluar user.')
+    parser.add_argument('--country', required=False, metavar='<Search country string>',
+                        help='Search country from available countries')
     parser.add_argument('--institution', required=False, metavar='<Institution>',
                         help='Institution Filter. Eg: "Motilal Nehru National Institute of Technology"')
     parser.add_argument('--languages', required=False, action='store_true',
@@ -42,19 +35,16 @@ def create_parser():
                         help='Get user information.')
     parser.add_argument('--compare', required=False, nargs=2, metavar=('<Username1>', '<Username2>'),
                         help='Compare two user profiles eg: vijju123 kingofnumber')
-    parser.add_argument('--recommend', required=False, metavar='<Username>',
-                        help='Get problem recommendation for a particular user.')
-<<<<<<< HEAD
     parser.add_argument('--submit', required=False, nargs=3, metavar=('<CodeFilePath>', '<Language>', '<InputString>'),
                         help='Submit and get output of code for a input.\nRequires three argument: codeFilePath, language and input string.\n E.g ./a.cpp C++ 4.3.2 Mohit \n If no input leave use -> ""\n.Check languages available using --languages')
-=======
+    parser.add_argument('--recommend', required=False, metavar='<Username>',
+                        help='Get problem recommendation for a particular user.')
     parser.add_argument('--graph', required=False, metavar='<Username',
                         help='Get submission graph for a particluar user.')
     parser.add_argument('--problem', required=False, nargs=2, metavar=(
         '<ContestCode>', '<ProblemCode>'), help='Get details of a particular Problem')
     parser.add_argument('--sampleSubmit', required=False, nargs=4, metavar=('<ContestCode>', '<ProblemCode>',
                                                                             '<CodeFilePath>', '<Language>'), help='Submit a problem to check if it passes sample test cases.')
->>>>>>> 965a5935bf7012f1aeafc2a13206e609881ab6ca
     return parser
 
 
@@ -72,7 +62,7 @@ def main(argv=None):
         # Arguments initialization
         contests = args.contests
         contestDetails = args.contestdetails
-        countries = args.countries
+        country = args.country
         institution = args.institution
         languages = args.languages
         tags = args.tags
@@ -92,18 +82,52 @@ def main(argv=None):
 
         elif contests:
             # Make request to fetch list of all contests
+            print("\n-----------Active Contests-----------\n\n")
             response = decode(makeRequest(
-                "GET", "https://api.codechef.com/contests"))
+                "GET", "https://api.codechef.com/contests?status=present"))
+            contestList = response.get('data',"").get('content',"").get('contestList',"")
+            for contest in contestList:
+                print("-------------------------------------")
+                print("Code : " + contest.get("code"))
+                print("Name : " + contest.get("name"))
+                print("Start Date : " + contest.get("startDate"))
+                print("End Date : " + contest.get("endDate"))
+
+            print("\n-----------Future Contests-----------\n")
+            response = decode(makeRequest(
+                "GET", "https://api.codechef.com/contests?status=future"))
+            contestList = response.get('data',"").get('content',"").get('contestList',"")
+            for contest in contestList:
+                print("-------------------------------------")
+                print("Code : " + contest.get("code"))
+                print("Name : " + contest.get("name"))
+                print("Start Date : " + contest.get("startDate"))
+                print("End Date : " + contest.get("endDate"))
+            print("-------------------------------------\n")
 
         elif contestDetails:
             # Make request to fetch details of particular contest
             response = decode(makeRequest(
                 "GET", "https://api.codechef.com/contests/" + contestDetails))
+            contestDetails = response.get('data',"").get('content',"")
+            print("\nContest : " + contestDetails.get("name",""))
+            print("Problem Code : Successful Submissions")
+            print("-------------------------------------\n")
+            problemList = contestDetails.get("problemsList","")
+            for problem in problemList:
+                print(str(problem.get("problemCode","")) + " : " + str(problem.get("successfulSubmissions","")))
+            print("-------------------------------------\n")
 
-        elif countries:
+        elif country:
             # Make request to fetch list of countries
             response = decode(makeRequest(
-                "GET", "https://api.codechef.com/country"))
+                "GET", "https://api.codechef.com/country?search="+country))
+            countriesList = response.get('data',"No results found").get('content',"No results found")
+            print("\n-------------------------------------")
+            print("\nList of matching countries\n")
+            for country in countriesList:
+                print(country.get("countryName",""))
+            print("\n-------------------------------------\n")
 
         elif graph_user:
             # Display submission graph of the user
@@ -113,6 +137,13 @@ def main(argv=None):
             # Make request to search institution
             response = decode(makeRequest(
                 "GET", "https://api.codechef.com/institution?search=" + institution))
+            # print(response)
+            instituteList = response.get('data',"No resuls found").get('content',"No results found")
+            print("\n-------------------------------------")
+            print("\nList of matching intitutes\n")
+            for institute in instituteList:
+                print(institute.get("institutionName",""))
+            print("\n-------------------------------------\n")
 
         elif languages:
             response = decode(makeRequest(
@@ -148,6 +179,15 @@ def main(argv=None):
             # Make request to fetch details of particular all_tags
             response = decode(makeRequest(
                 "GET", "https://api.codechef.com/tags/problems?filter=" + tags))
+            problem_tags = response.get(
+                "data", "Not Found").get("content", "Not Found")
+            print("Problem code : Solved count")
+            for key in problem_tags.keys():
+                val = problem_tags[key]
+                for keys in problem_tags[key]:
+                    if keys == "solved":
+                        solved = str(val[keys])
+                print("- " + key +" : "+ solved)
 
         elif todo:
             # Make request to fetch user todo problems
@@ -158,8 +198,26 @@ def main(argv=None):
             # Make request to fetch user details
             response = decode(makeRequest(
                 "GET", "https://api.codechef.com/users/" + user))
-
-        # print(json.dumps(response, indent=4, sort_keys=True))
+            user = response.get("data", "Not Found").get("content", "Not Found")
+            print(user)
+            print("\n--------------User Details-----------------------\n")
+            print("Name          : " + str(user.get("fullname","")))
+            print("City          : " + str(user.get("city","").get("name","")))
+            print("State         : " + str(user.get("state","").get("name","")))
+            print("Country       : " + str(user.get("country","").get("name","")))
+            print("Band          : " + str(user.get("band","")))
+            print("\n--------------Problem Stats-----------------------\n")
+            print("Partially Solved     : " + str(user.get("submissionStats","").get("partiallySolvedProblems","")))
+            print("Completely Solved    : " + str(user.get("submissionStats","").get("solvedProblems","")))
+            print("Solutions Submitted  : " + str(user.get("submissionStats","").get("submittedSolutions","")))
+            print("AC Submissions       : " + str(user.get("submissionStats","").get("acceptedSubmissions","")))
+            print("Wrong Submissions    : " + str(user.get("submissionStats","").get("wrongSubmissions","")))
+            print("\n--------------Rating Stats-----------------------\n")
+            print("Overall  : " + str(user.get("ratings","").get("allContest","")))
+            print("Long     : " + str(user.get("ratings","").get("long","")))
+            print("Short    : " + str(user.get("ratings","").get("short","")))
+            print("LTime    : " + str(user.get("ratings","").get("lTime","")))
+            print("\n-------------------------------------------------\n")
 
     except KeyboardInterrupt:
         print('\nGood Bye.')
@@ -188,31 +246,6 @@ def submitCode(submit):
         print("Compilation Result :\n" + response.get('data', "").get('cmpinfo'))
     print("-------------------------------------------------------------\n")
 
-    git_request = input("Want to save this code on github ? Enter Y or N: ")
-    if(git_request == 'N'):
-        return 0;
-    else:
-        gitusername = input("Enter Username: ")
-        passwd = getpass.getpass('Password:')
-        repoName = input("Enter Repo name , if you already have a repo for this press C")
-        if(repoName != 'C'):
-            print("Creating Repo")
-            repodata = {}
-            description = input("Enter description for repo")
-            repotype = input("Enter pb for public,pr for private repo")
-            repo = True
-            if repotype == "pr":
-                repo = False
-            filename = input("Enter filename eg a.cpp")
-            files = {}
-            filecontents = {}
-            filepath = input("enter complete file path eg. ./code/a.cpp")
-            file = open(filepath, "r")
-            filecontents['content'] = file.read()
-            files[filename] = filecontents
-            repodata['description'] = description
-            repodata['public'] = repo
-            repodata['files'] = files
     return 0
 
 
