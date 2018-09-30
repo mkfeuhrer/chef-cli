@@ -200,9 +200,10 @@ def main(argv=None):
             res.sort()
             instituteRanks = {}
             instituteCount = {}
-            print("\nFollowing contests are considered for ranking the institutes\n")
+            print(colored("\n-------------------------------------\n", "yellow"))
+            print(colored("\nFollowing contests are considered for ranking the institutes\n", "yellow"))
             for contest in res:
-                print(contest)
+                print(colored(contest, "blue"))
                 currentInstitute = {}
                 response = decode(makeRequest(
                     "GET", "https://api.codechef.com/rankings/" + contest + "?institutionType=College"))
@@ -232,10 +233,11 @@ def main(argv=None):
             for key in instituteRanks:
                 result[key] = int(instituteRanks[key]/instituteCount[key])
             result1 = sorted(result.items(), key=lambda x: x[1])
-            print("\n-----------Institute wise ranklist for past 6 months------------\n")
+            print(colored("\n-----------Institute wise ranklist based on events listed above------------\n", "yellow"))
+            print(colored("\n\tCollege Name : College Rating\n", "yellow"))
             for key in result1:
-                print(key)
-            print("\n----------------------------------------------------------------\n")
+                print(colored(key[0] + " : ", "blue") + str(key[1]))
+            print(colored("\n----------------------------------------------------------------\n", "yellow"))
 
         elif recommend_user:
             # Recommend problems to a user based on the previous problems that he solved

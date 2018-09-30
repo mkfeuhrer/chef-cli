@@ -31,6 +31,7 @@ Chef-Cli is a command line interface which uses CodeChef’s official API. This 
  - Recommends problem based on past solved problems by a user.
  - Uses content based recommendation system for problem recommendation.
  - Parameters - Difficulty , tags , No. of users who solved , Rating of user who solved
+- Get a ranking of all the institutes on CodeChef based on the performance of students in past contests.
 - Submit problems to CodeChef IDE directly from the terminal and get the final result right on the terminal.
 - Get list of both upcoming and currently running contests.
 - Get all details about a contest.
@@ -75,6 +76,10 @@ Chef-Cli is a command line interface which uses CodeChef’s official API. This 
 **Recommend Problem**
 
 ![Recommend Problem](https://raw.githubusercontent.com/mkfeuhrer/chef-cli/master/screenshots/RecommendProblem.png?token=AQ8RNZuCGrJDkgjanVoN9AWa6HNabV-hks5buhBDwA%3D%3D)
+
+**Institute Ranking**
+
+![Institute Ranking](https://raw.githubusercontent.com/mkfeuhrer/chef-cli/master/screenshots/CollegeRanking.png?token=AQ8RNYXdq2KgGdCtUA2xJ1THgqUAa7yoks5buirHwA%3D%3D)
 
 ## Feedback
 
