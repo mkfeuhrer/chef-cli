@@ -21,8 +21,8 @@ def create_parser():
                         help='Get All Contests')
     parser.add_argument('--contestdetails', required=False, metavar='<ContestDetails>',
                         help='Get details of Contest.Eg- JAN17,APR18')
-    parser.add_argument('--countries', required=False, action='store_true',
-                        help='Get list of countries')
+    parser.add_argument('--country', required=False, metavar='<Search country string>',
+                        help='Search country from available countries')
     parser.add_argument('--institution', required=False, metavar='<Institution>',
                         help='Institution Filter. Eg: "Motilal Nehru National Institute of Technology"')
     parser.add_argument('--languages', required=False, action='store_true',
@@ -62,7 +62,7 @@ def main(argv=None):
         # Arguments initialization
         contests = args.contests
         contestDetails = args.contestdetails
-        countries = args.countries
+        country = args.country
         institution = args.institution
         languages = args.languages
         tags = args.tags
@@ -82,18 +82,56 @@ def main(argv=None):
 
         elif contests:
             # Make request to fetch list of all contests
+            print("\n-----------Active Contests-----------\n\n")
             response = decode(makeRequest(
-                "GET", "https://api.codechef.com/contests"))
+                "GET", "https://api.codechef.com/contests?status=present"))
+            contestList = response.get('data', "").get(
+                'content', "").get('contestList', "")
+            for contest in contestList:
+                print("-------------------------------------")
+                print("Code : " + contest.get("code"))
+                print("Name : " + contest.get("name"))
+                print("Start Date : " + contest.get("startDate"))
+                print("End Date : " + contest.get("endDate"))
+
+            print("\n-----------Future Contests-----------\n")
+            response = decode(makeRequest(
+                "GET", "https://api.codechef.com/contests?status=future"))
+            contestList = response.get('data', "").get(
+                'content', "").get('contestList', "")
+            for contest in contestList:
+                print("-------------------------------------")
+                print("Code : " + contest.get("code"))
+                print("Name : " + contest.get("name"))
+                print("Start Date : " + contest.get("startDate"))
+                print("End Date : " + contest.get("endDate"))
+            print("-------------------------------------\n")
 
         elif contestDetails:
             # Make request to fetch details of particular contest
             response = decode(makeRequest(
                 "GET", "https://api.codechef.com/contests/" + contestDetails))
+            contestDetails = response.get('data', "").get('content', "")
+            print("\nContest : " + contestDetails.get("name", ""))
+            print("Problem Code : Successful Submissions")
+            print("-------------------------------------\n")
+            problemList = contestDetails.get("problemsList", "")
+            for problem in problemList:
+                print(str(problem.get("problemCode", "")) + " : " +
+                      str(problem.get("successfulSubmissions", "")))
+            print("-------------------------------------\n")
 
-        elif countries:
+        elif country:
             # Make request to fetch list of countries
             response = decode(makeRequest(
-                "GET", "https://api.codechef.com/country"))
+                "GET", "https://api.codechef.com/country?search=" + country))
+            countriesList = response.get('data', "No results found").get(
+                'content', "No results found")
+            print("\n-------------------------------------")
+            print("\nList of matching countries\n")
+            for country in countriesList:
+                print(country.get("countryName", ""))
+            print("\n-------------------------------------\n")
 
         elif graph_user:
             # Display submission graph of the user
@@ -103,6 +141,14 @@ def main(argv=None):
             # Make request to search institution
             response = decode(makeRequest(
                 "GET", "https://api.codechef.com/institution?search=" + institution))
+            # print(response)
+            instituteList = response.get('data', "No resuls found").get(
+                'content', "No results found")
+            print("\n-------------------------------------")
+            print("\nList of matching intitutes\n")
+            for institute in instituteList:
+                print(institute.get("institutionName", ""))
+            print("\n-------------------------------------\n")
 
         elif languages:
             response = decode(makeRequest(
@@ -138,6 +184,15 @@ def main(argv=None):
             # Make request to fetch details of particular all_tags
             response = decode(makeRequest(
                 "GET", "https://api.codechef.com/tags/problems?filter=" + tags))
+            problem_tags = response.get(
+                "data", "Not Found").get("content", "Not Found")
+            print("Problem code : Solved count")
+            for key in problem_tags.keys():
+                val = problem_tags[key]
+                for keys in problem_tags[key]:
+                    if keys == "solved":
+                        solved = str(val[keys])
+                print("- " + key + " : " + solved)
 
         elif todo:
             # Make request to fetch user todo problems
@@ -148,9 +203,33 @@ def main(argv=None):
             # Make request to fetch user details
             response = decode(makeRequest(
                 "GET", "https://api.codechef.com/users/" + user))
-            print(response)
 
-        # print(json.dumps(response, indent=4, sort_keys=True))
+            user = response.get("data", "Not Found").get(
+                "content", "Not Found")
+            print(user)
+            print("\n--------------User Details-----------------------\n")
+            print("Name          : " + str(user.get("fullname", "")))
+            print("City          : " + str(user.get("city", "").get("name", "")))
+            print("State         : " + str(user.get("state", "").get("name", "")))
+            print("Country       : " + str(user.get("country", "").get("name", "")))
+            print("Band          : " + str(user.get("band", "")))
+            print("\n--------------Problem Stats-----------------------\n")
+            print("Partially Solved     : " + str(user.get("submissionStats",
+                                                           "").get("partiallySolvedProblems", "")))
+            print("Completely Solved    : " +
+                  str(user.get("submissionStats", "").get("solvedProblems", "")))
+            print("Solutions Submitted  : " +
+                  str(user.get("submissionStats", "").get("submittedSolutions", "")))
+            print("AC Submissions       : " +
+                  str(user.get("submissionStats", "").get("acceptedSubmissions", "")))
+            print("Wrong Submissions    : " +
+                  str(user.get("submissionStats", "").get("wrongSubmissions", "")))
+            print("\n--------------Rating Stats-----------------------\n")
+            print("Overall  : " + str(user.get("ratings", "").get("allContest", "")))
+            print("Long     : " + str(user.get("ratings", "").get("long", "")))
+            print("Short    : " + str(user.get("ratings", "").get("short", "")))
+            print("LTime    : " + str(user.get("ratings", "").get("lTime", "")))
+            print("\n-------------------------------------------------\n")
 
     except KeyboardInterrupt:
         print('\nGood Bye.')
