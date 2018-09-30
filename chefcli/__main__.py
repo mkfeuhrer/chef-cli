@@ -82,44 +82,45 @@ def main(argv=None):
 
         elif contests:
             # Make request to fetch list of all contests
-            print("\n-----------Active Contests-----------\n\n")
+            print(colored("\n-----------Active Contests-----------\n\n", "yellow"))
             response = decode(makeRequest(
                 "GET", "https://api.codechef.com/contests?status=present"))
             contestList = response.get('data', "").get(
                 'content', "").get('contestList', "")
             for contest in contestList:
-                print("-------------------------------------")
-                print("Code : " + contest.get("code"))
-                print("Name : " + contest.get("name"))
-                print("Start Date : " + contest.get("startDate"))
-                print("End Date : " + contest.get("endDate"))
+                print(colored("-------------------------------------", "yellow"))
+                print(colored("\tCode : ", "blue") + contest.get("code"))
+                print(colored("\tName : ", "blue") + contest.get("name"))
+                print(colored("\tStart Date : ", "blue") + contest.get("startDate"))
+                print(colored("\tEnd Date : ", "blue") + contest.get("endDate"))
 
-            print("\n-----------Future Contests-----------\n")
+            print(colored("\n-----------Future Contests-----------\n", "yellow"))
             response = decode(makeRequest(
                 "GET", "https://api.codechef.com/contests?status=future"))
             contestList = response.get('data', "").get(
                 'content', "").get('contestList', "")
             for contest in contestList:
-                print("-------------------------------------")
-                print("Code : " + contest.get("code"))
-                print("Name : " + contest.get("name"))
-                print("Start Date : " + contest.get("startDate"))
-                print("End Date : " + contest.get("endDate"))
-            print("-------------------------------------\n")
+                print(colored("-------------------------------------", "yellow"))
+                print(colored("\tCode : ", "blue") + contest.get("code"))
+                print(colored("\tName : ", "blue") + contest.get("name"))
+                print(colored("\tStart Date : ", "blue") + contest.get("startDate"))
+                print(colored("\tEnd Date : ", "blue") + contest.get("endDate"))
+            print(colored("-------------------------------------\n", "yellow"))
 
         elif contestDetails:
             # Make request to fetch details of particular contest
             response = decode(makeRequest(
                 "GET", "https://api.codechef.com/contests/" + contestDetails))
             contestDetails = response.get('data', "").get('content', "")
-            print("\nContest : " + contestDetails.get("name", ""))
-            print("Problem Code : Successful Submissions")
-            print("-------------------------------------\n")
+            print(colored("-------------------------------------\n", "yellow"))
+            print(colored("\tContest : ", "blue") + contestDetails.get("name", ""))
+            print(colored("\nProblem Code : Successful Submissions", "yellow"))
+            print(colored("-------------------------------------\n", "yellow"))
             problemList = contestDetails.get("problemsList", "")
             for problem in problemList:
-                print(str(problem.get("problemCode", "")) + " : " +
+                print(colored("\t" + str(problem.get("problemCode", "")), "blue") + " : " +
                       str(problem.get("successfulSubmissions", "")))
-            print("-------------------------------------\n")
+            print(colored("-------------------------------------\n", "yellow"))
 
         elif country:
             # Make request to fetch list of countries
@@ -127,11 +128,11 @@ def main(argv=None):
                 "GET", "https://api.codechef.com/country?search=" + country))
             countriesList = response.get('data', "No results found").get(
                 'content', "No results found")
-            print("\n-------------------------------------")
-            print("\nList of matching countries\n")
+            print(colored("\n-------------------------------------", "yellow"))
+            print(colored("\nList of matching countries\n", "yellow"))
             for country in countriesList:
-                print(country.get("countryName", ""))
-            print("\n-------------------------------------\n")
+                print(colored("\t" + country.get("countryName", ""), "blue"))
+            print(colored("\n-------------------------------------\n", "yellow"))
 
         elif graph_user:
             # Display submission graph of the user
@@ -144,20 +145,21 @@ def main(argv=None):
             # print(response)
             instituteList = response.get('data', "No resuls found").get(
                 'content', "No results found")
-            print("\n-------------------------------------")
-            print("\nList of matching intitutes\n")
+            print(colored("\n-------------------------------------", "yellow"))
+            print(colored("\nList of matching intitutes\n", "yellow"))
             for institute in instituteList:
-                print(institute.get("institutionName", ""))
-            print("\n-------------------------------------\n")
+                print("\t" + colored(institute.get("institutionName", ""), "blue"))
+            print(colored("\n-------------------------------------\n", "yellow"))
 
         elif languages:
             response = decode(makeRequest(
                 "GET", "https://api.codechef.com/language"))
             languagesList = response.get(
                 "data", "Not Found").get("content", "Not Found")
-            print("\n---------------------List of Languages---------------------\n")
+            print(colored("\n---------------------List of Languages---------------------\n", "yellow"))
             for lang in languagesList:
-                print(lang.get("shortName", ""))
+                print("\t" + colored(lang.get("shortName", ""), "blue"))
+            print(colored("\n-------------------------------------\n", "yellow"))
 
         elif problem:
             # Display details of a problem
@@ -169,8 +171,13 @@ def main(argv=None):
                 "http://149.129.138.84:5000/api/recommend/user/" + recommend_user).json()
             problem_list = response.get("recommendedProblems", [])
 
-            for problem in problem_list:
-                print(problem)
+            print(colored("\n-------------------------------------", "yellow"))
+            print(colored("\nList of recommended problems\n", "yellow"))
+
+            for problem in problem_list[:10]:
+                print("\t" + colored(problem, "blue"))
+
+            print(colored("\n-------------------------------------\n", "yellow"))
 
         elif submit:
             # Submit and run code for output
@@ -186,16 +193,19 @@ def main(argv=None):
                 "GET", "https://api.codechef.com/tags/problems?filter=" + tags))
             problem_tags = response.get(
                 "data", "Not Found").get("content", "Not Found")
-            print("Problem code : Solved count")
+            print(colored("\n-------------------------------------\n", "yellow"))
+            print(colored("Problem code : Solved count\n", "yellow"))
             for key in problem_tags.keys():
                 val = problem_tags[key]
                 for keys in problem_tags[key]:
                     if keys == "solved":
                         solved = str(val[keys])
-                print("- " + key + " : " + solved)
+                print("\t" + colored(key, "blue") + " : " + solved)
+            print(colored("\n-------------------------------------\n", "yellow"))
 
         elif todo:
             # Make request to fetch user todo problems
+            # In progress ...
             response = decode(makeRequest(
                 "GET", "https://api.codechef.com/todo/problems/"))
 
@@ -206,30 +216,30 @@ def main(argv=None):
 
             user = response.get("data", "Not Found").get(
                 "content", "Not Found")
-            print(user)
-            print("\n--------------User Details-----------------------\n")
-            print("Name          : " + str(user.get("fullname", "")))
-            print("City          : " + str(user.get("city", "").get("name", "")))
-            print("State         : " + str(user.get("state", "").get("name", "")))
-            print("Country       : " + str(user.get("country", "").get("name", "")))
-            print("Band          : " + str(user.get("band", "")))
-            print("\n--------------Problem Stats-----------------------\n")
-            print("Partially Solved     : " + str(user.get("submissionStats",
+
+            print(colored("\n--------------User Details-----------------------\n", "yellow"))
+            print("\t" + colored("Name          : ", "blue") + str(user.get("fullname", "")))
+            print("\t" + colored("City          : ", "blue") + str(user.get("city", "").get("name", "")))
+            print("\t" + colored("State         : ", "blue") + str(user.get("state", "").get("name", "")))
+            print("\t" + colored("Country       : ", "blue") + str(user.get("country", "").get("name", "")))
+            print("\t" + colored("Band          : ", "blue") + str(user.get("band", "")))
+            print(colored("\n--------------Problem Stats-----------------------\n", "yellow"))
+            print("\t" + colored("Partially Solved     : ", "blue") + str(user.get("submissionStats",
                                                            "").get("partiallySolvedProblems", "")))
-            print("Completely Solved    : " +
+            print("\t" + colored("Completely Solved    : ", "blue") +
                   str(user.get("submissionStats", "").get("solvedProblems", "")))
-            print("Solutions Submitted  : " +
+            print("\t" + colored("Solutions Submitted  : ", "blue") +
                   str(user.get("submissionStats", "").get("submittedSolutions", "")))
-            print("AC Submissions       : " +
+            print("\t" + colored("AC Submissions       : ", "blue") +
                   str(user.get("submissionStats", "").get("acceptedSubmissions", "")))
-            print("Wrong Submissions    : " +
+            print("\t" + colored("Wrong Submissions    : ", "blue") +
                   str(user.get("submissionStats", "").get("wrongSubmissions", "")))
-            print("\n--------------Rating Stats-----------------------\n")
-            print("Overall  : " + str(user.get("ratings", "").get("allContest", "")))
-            print("Long     : " + str(user.get("ratings", "").get("long", "")))
-            print("Short    : " + str(user.get("ratings", "").get("short", "")))
-            print("LTime    : " + str(user.get("ratings", "").get("lTime", "")))
-            print("\n-------------------------------------------------\n")
+            print(colored("\n--------------Rating Stats-----------------------\n", "yellow"))
+            print("\t" + colored("Overall  : ", "blue") + str(user.get("ratings", "").get("allContest", "")))
+            print("\t" + colored("Long     : ", "blue") + str(user.get("ratings", "").get("long", "")))
+            print("\t" + colored("Short    : ", "blue") + str(user.get("ratings", "").get("short", "")))
+            print("\t" + colored("LTime    : ", "blue") + str(user.get("ratings", "").get("lTime", "")))
+            print(colored("\n-------------------------------------------------\n", "yellow"))
 
     except KeyboardInterrupt:
         print('\nGood Bye.')
@@ -316,11 +326,11 @@ def compareProfiles(compare):
     ranks.append(Srankings)
     data.append(Srankings)
 
-    print("\n---------------------Profile Comparision---------------------\n")
+    print(colored("\n---------------------Profile Comparision---------------------\n", "yellow"))
     col_width = max(len(word) for row in data for word in row) + 2
     for row in data:
         print("\t".join(word.ljust(col_width) for word in row))
-    print("\n-------------------------------------------------------------\n")
+    print(colored("\n-------------------------------------------------------------\n", "yellow"))
 
     ranks.pop(0)
     header_columns = ['@ ' + name1, name2]
@@ -381,10 +391,13 @@ def submissionGraph(user):
         for key, value in sorted_submissions.items():
             file_writer.writerow([key, value])
 
+    print(colored("\n-------------------------------------\n", "yellow"))
+    print(colored("\tSubmission graph", "yellow"))
+
     os.system("termgraph --calendar --start-dt " +
               startDate + " submission_graph.dat")
     os.system('rm submission_graph.dat')
-
+    print(colored("\n-------------------------------------\n", "yellow"))
 
 def renderProblem(problem):
 
