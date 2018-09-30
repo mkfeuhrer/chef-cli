@@ -5,8 +5,8 @@ import csv
 import os
 import requests
 import collections
-from ChefRequest import makeRequest
-from ChefParser import CodeChefHTMLParser
+from chefcli.ChefRequest import makeRequest
+from chefcli.ChefParser import CodeChefHTMLParser
 from datetime import datetime
 from termcolor import colored
 
@@ -148,6 +148,7 @@ def main(argv=None):
             # Make request to fetch user details
             response = decode(makeRequest(
                 "GET", "https://api.codechef.com/users/" + user))
+            print(response)
 
         # print(json.dumps(response, indent=4, sort_keys=True))
 
