@@ -445,7 +445,7 @@ def sampleSubmitCode(sampleSubmit):
     response = decode(makeRequest(
         "GET", "https://api.codechef.com/ide/status?link=" + result))
 
-    if response.get('data', "").get('output') in parser.getSampleOutput():
+    if response.get('data', "").get('output') == parser.getSampleOutput():
         print(colored('\nSample Test Cases Passed Successfully', 'green'))
     else:
         print(colored('\nSample Test Cases Failed', 'red'))

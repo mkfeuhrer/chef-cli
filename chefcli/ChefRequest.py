@@ -7,8 +7,8 @@ oauth_url = "https://api.codechef.com/oauth/authorize"
 
 def makeRequest(type, url, body={}):
 
-    CLIENT_ID = config('CLIENT_ID')
-    CLIENT_SECRET = config('CLIENT_SECRET')
+    CLIENT_ID = "8dbc7546565fb2d3d9421eb0b5ef73e2"
+    CLIENT_SECRET = "389847e7c444bc6c3972dfff3baba3ee"
     # STATE = config('STATE')
 
     data = {
