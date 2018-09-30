@@ -25,7 +25,7 @@ setup(
                       'requests', 'termgraph', 'termcolor'],
     python_requires='>=3.5',
     requires=['decouple', 'mdv', 'requests', 'termgraph', 'termcolor'],
-    version='0.0.4',
+    version='1.0.0',
     url='https://github.com/mkfeuhrer/chef-cli',
     keywords="chef-cli codechef cli programming",
     license='MIT',

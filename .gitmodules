@@ -1,0 +1,3 @@
+[submodule "chef-recommender"]
+	path = chef-recommender
+	url = https://github.com/Abhey/chef-recommender
