@@ -1,10 +1,10 @@
-#Chef-Cli
+# Chef-Cli
 
 ![Logo](screenshots/logo.png)
 
 CodeChef command line interface. ChefCLI helps competitive coders to search, view, and submit problems in CodeChef.
 
-##Table of Contents
+## Table of Contents
 
 - [Introduction](#introduction)
 - [Features](#features)
@@ -15,11 +15,11 @@ CodeChef command line interface. ChefCLI helps competitive coders to search, vie
 - [Contribute](#contribute)
 - [Acknowledgement](#acknowledgment)
 
-##Introduction
+## Introduction
 
 Chef-Cli is a command line interface which uses CodeChef’s official API. This application is for those who hate graphical application and love to do everything from terminal.  With features like sample submit and problem recommendation, It is designed to improve the overall productivity of the user.
 
-##Features
+## Features
 
 - View Problem Statement In Terminal
 - Get complete profile information about a particluar user.
@@ -37,7 +37,7 @@ Chef-Cli is a command line interface which uses CodeChef’s official API. This 
 - Get list of problems with a particular tag.
 - Search an institution from registered institution on Codechef.
 
-##Installation Instruction
+## Installation Instruction
 
 - Chef-CLI is available as a python package.
 
@@ -49,7 +49,7 @@ Chef-Cli is a command line interface which uses CodeChef’s official API. This 
 
 - Enjoy !!
 
-##Screenshots
+## Screenshots
 
 **View Problem Statements In Terminal**
 
@@ -75,21 +75,21 @@ Chef-Cli is a command line interface which uses CodeChef’s official API. This 
 
 ![Recommend Problem](screenshots/RecommendProblem.png)
 
-##Feedback
+## Feedback
 
 Feel free to send us feedback on [Email](mailto:mohitfeuhrer@gmail.com) or [file an issue](https://github.com/mkfeuhrer/chef-cli/issues).
 
-##Contributors
+## Contributors
 
 - [Abhey Rana](https://github.com/Abhey)
 - [Mohit Khare](https://github.com/mkfeuhrer)
 
-##Contribute
+## Contribute
 
 - Feel free to report issues and bugs.It will be helpful for future launches of application.
 - All Suggestions are welcome.
 - Fork repository and Contribute.
 
-##Acknowledgment
+## Acknowledgment
 
 Thanks to [CodeChef](https://codechef.com/) for providing CodeChef Api and [Alibaba Cloud](https://www.alibabacloud.com) for providing platform.
