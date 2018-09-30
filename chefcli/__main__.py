@@ -29,14 +29,14 @@ def create_parser():
                         help='Get list of languages on codechef')
     parser.add_argument('--tags', required=False, metavar='<ProblemBasedOnTags>',
                         help='Problem for given tags/authors. eg: jan13,kingofnumber')
-    parser.add_argument('--todo', required=False, action='store_true',
-                        help='Gets Problems listed in todo')
     parser.add_argument('--user', required=False, metavar='<Username>',
                         help='Get user information.')
     parser.add_argument('--compare', required=False, nargs=2, metavar=('<Username1>', '<Username2>'),
                         help='Compare two user profiles eg: vijju123 kingofnumber')
     parser.add_argument('--submit', required=False, nargs=3, metavar=('<CodeFilePath>', '<Language>', '<InputString>'),
                         help='Submit and get output of code for a input.\nRequires three argument: codeFilePath, language and input string.\n E.g ./a.cpp C++ 4.3.2 Mohit \n If no input leave use -> ""\n.Check languages available using --languages')
+    parser.add_argument('--rankings', required=False, action='store_true',
+                        help='Get Institute wise ranking list a.k.a Chef-cli ratings')
     parser.add_argument('--recommend', required=False, metavar='<Username>',
                         help='Get problem recommendation for a particular user.')
     parser.add_argument('--graph', required=False, metavar='<Username',
@@ -66,11 +66,11 @@ def main(argv=None):
         institution = args.institution
         languages = args.languages
         tags = args.tags
-        todo = args.todo
         user = args.user
         compare = args.compare
         submit = args.submit
         graph_user = args.graph
+        rankings = args.rankings
         recommend_user = args.recommend
         problem = args.problem
         sampleSubmit = args.sampleSubmit
@@ -165,6 +165,78 @@ def main(argv=None):
             # Display details of a problem
             renderProblem(problem)
 
+        elif rankings:
+            response = decode(makeRequest(
+                "GET", "https://api.codechef.com/contests?status=past&limit=20&sortOrder=desc"))
+            contestList = response.get('data',"").get('content',"").get('contestList',"")
+            contests = []
+            months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEPT','OCT','NOV','DEC']
+            for contest in contestList:
+                name = contest['name']
+                code = contest['code']
+                if code.find("COOK") != -1 or code.find("LTIME") != -1:
+                    contests.append(code+"A")
+                    contests.append(code+"B")
+                for month in months:
+                    if code.find(month) != -1 and name.find("Challenge") != -1:
+                        contests.append(code+"A")
+                        contests.append(code+"B")
+            contests.sort()
+            check = {}
+            for contest in contests:
+                check[contest] = -1
+            for contest in contests:
+                code = contest
+                if check[code] == -1:
+                    for con in contests:
+                        if con == code:
+                            continue
+                        if(con.find(code) != -1):
+                            check[con] = 0
+            res = []
+            for key in check:
+                if check[key] == -1:
+                    res.append(key)
+            res.sort()
+            instituteRanks = {}
+            instituteCount = {}
+            print("\nFollowing contests are considered for ranking the institutes\n")
+            for contest in res:
+                print(contest)
+                currentInstitute = {}
+                response = decode(makeRequest(
+                    "GET", "https://api.codechef.com/rankings/" + contest + "?institutionType=College"))
+                # print(response)
+                ranklist = response.get('data',"").get('content',"")
+                for rankDetail in ranklist:
+                    rank = int(rankDetail.get("rank"))
+                    institute = rankDetail.get("institution")
+                    if institute in instituteRanks:
+                        if institute in currentInstitute:
+                            currentInstitute[institute] = currentInstitute[institute] + 1
+                        else:
+                            currentInstitute[institute] = 1
+                        if currentInstitute[institute] > 25:
+                            continue
+                        instituteRanks[institute] = instituteRanks[institute] + rank
+                        instituteCount[institute] = instituteCount[institute] + 1
+                    else:
+                        currentInstitute[institute] = 1
+                        instituteRanks[institute] = rank
+                        instituteCount[institute] = 1
+                for institute in currentInstitute:
+                    if(currentInstitute[institute] < 25):
+                        instituteRanks[institute] = instituteRanks[institute] + (25-currentInstitute[institute])*300
+            result = {}
+            result1 = {}
+            for key in instituteRanks:
+                result[key] = int(instituteRanks[key]/instituteCount[key])
+            result1 = sorted(result.items(), key=lambda x: x[1])
+            print("\n-----------Institute wise ranklist for past 6 months------------\n")
+            for key in result1:
+                print(key)
+            print("\n----------------------------------------------------------------\n")
+
         elif recommend_user:
             # Recommend problems to a user based on the previous problems that he solved
             response = requests.get(
@@ -202,12 +274,6 @@ def main(argv=None):
                         solved = str(val[keys])
                 print("\t" + colored(key, "blue") + " : " + solved)
             print(colored("\n-------------------------------------\n", "yellow"))
-
-        elif todo:
-            # Make request to fetch user todo problems
-            # In progress ...
-            response = decode(makeRequest(
-                "GET", "https://api.codechef.com/todo/problems/"))
 
         elif user:
             # Make request to fetch user details
