@@ -4,7 +4,7 @@
 ![Logo](https://raw.githubusercontent.com/mkfeuhrer/chef-cli/master/screenshots/logo.png?token=AQ8RNdhzo_0zyGAhqY5omLscf31UXd1mks5bug5ywA%3D%3D)
 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/mkfeuhrer/chef-cli)
-[![GitHub Stars](https://img.shields.io/github/stars/Abhey/Vision.svg)](https://github.com/mkfeuhrer/chef-cli) 
+[![GitHub Stars](https://img.shields.io/github/stars/mkfeuhrer/chef-cli.svg)](https://github.com/mkfeuhrer/chef-cli) 
 [![Current Version](https://img.shields.io/badge/version-1.1-green.svg)](https://github.com/mkfeuhrer/chef-cli)<br>
 
 CodeChef command line interface. ChefCLI helps competitive coders to search, view, and submit problems in CodeChef.
