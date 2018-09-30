@@ -5,13 +5,15 @@ except ImportError:
 import sys
 
 from codecs import open
+from os import path
 
 if sys.version < '3.5.1':
     print("Supports only Python >= 3.5.1")
     sys.exit(1)
 
-with open('README.md') as f:
-    longd = f.read()
+this_directory = path.abspath(path.dirname(__file__))
+with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
 
 setup(
     name='chef-cli',
@@ -23,7 +25,7 @@ setup(
                       'requests', 'termgraph', 'termcolor'],
     python_requires='>=3.5',
     requires=['decouple', 'mdv', 'requests', 'termgraph', 'termcolor'],
-    version='0.0.1',
+    version='0.0.2',
     url='https://github.com/mkfeuhrer/chef-cli',
     keywords="chef-cli codechef cli programming",
     license='MIT',
@@ -31,5 +33,6 @@ setup(
     author_email='abhey.mnnit@gmail.com',
     description='CodeChef command line interface. ChefCLI helps competitive coders to search, view,\
                  and submit problems in CodeChef.',
-    long_description="\n\n" + longd
+    long_description=long_description,
+    long_description_content_type='text/markdown'
 )
