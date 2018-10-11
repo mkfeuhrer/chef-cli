@@ -242,7 +242,7 @@ def main(argv=None):
         elif recommend_user:
             # Recommend problems to a user based on the previous problems that he solved
             response = requests.get(
-                "http://149.129.138.84:5000/api/recommend/user/" + recommend_user).json()
+                "http://149.129.139.203:5000/api/recommend/user/" + recommend_user).json()
             problem_list = response.get("recommendedProblems", [])
 
             print(colored("\n-------------------------------------", "yellow"))
