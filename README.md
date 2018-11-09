@@ -13,7 +13,7 @@ CodeChef command line interface. ChefCLI helps competitive coders to search, vie
 
 - [Introduction](#introduction)
 - [Features](#features)
-- [Installation Instruction](##installation)
+- [Installation Instruction](#installation-instruction)
 - [Screenshots](#screenshots)
 - [Feedback](#feedback)
 - [Contributors](#contributors)
