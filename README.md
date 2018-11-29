@@ -24,6 +24,8 @@ CodeChef command line interface. ChefCLI helps competitive coders to search, vie
 
 Chef-Cli is a command line interface which uses CodeChef’s official API. This application is for those who hate graphical application and love to do everything from terminal.  With features like sample submit and problem recommendation, It is designed to improve the overall productivity of the user.
 
+<strong> Update : We stood 8th among 2000+ teams in the Codechef Api Hackathon. </strong>
+
 [![Chef-CLI](http://img.youtube.com/vi/xONwEaXsgfw/0.jpg)](http://www.youtube.com/watch?v=xONwEaXsgfw)
 
 ## Features
